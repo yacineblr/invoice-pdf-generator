@@ -2,6 +2,7 @@ const http = require('http');
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
+const fs = require('fs');
 const app = express();
 
 const nodemailer = require('nodemailer');
@@ -9,12 +10,14 @@ const nodemailer = require('nodemailer');
 const pdfMakePrinter = require('pdfmake');
 const rootDir = path.resolve(path.dirname('.'));
 
+const data = JSON.parse(fs.readFileSync('data.json'));
+
 // Create a SMTP transport object
 const transport = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: "youremail@gmail.com",
-        pass: "yourpassword"
+        user: data.email,
+        pass: data.password
     }
 });
 console.log('SMTP Configured');
