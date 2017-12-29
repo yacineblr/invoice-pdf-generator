@@ -11,6 +11,7 @@ const pdfMakePrinter = require('pdfmake');
 const rootDir = path.resolve(path.dirname('.'));
 
 const data = JSON.parse(fs.readFileSync('data.json'));
+console.log('Data: ', data);
 
 // Create a SMTP transport object
 const transport = nodemailer.createTransport({
