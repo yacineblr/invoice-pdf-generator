@@ -364,6 +364,9 @@ app.post('/mailer', function(req, res) {
     });
 });
 
+app.get('/status', function(req, res) {
+    res.send("Server worked");
+})
 
 
 
