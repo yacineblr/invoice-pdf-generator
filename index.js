@@ -309,7 +309,7 @@ function createPdfBinary(pdf, callback) {
 }
 
 
-app.post('/pdf', function (req, res) {
+app.post('/api/pdf', function (req, res) {
 
     var data = req.body;
     // console.log(data.bill.lines);
@@ -327,7 +327,7 @@ app.post('/pdf', function (req, res) {
 
 });
 
-app.post('/mailer', function(req, res) {
+app.post('/api/mailer', function(req, res) {
     var data = req.body;
     var pdfDoc = createDoc(createPdf(data));
     pdfDoc.end();
@@ -364,7 +364,7 @@ app.post('/mailer', function(req, res) {
     });
 });
 
-app.get('/status', function(req, res) {
+app.get('/api/status', function(req, res) {
     res.send("Server worked");
 })
 
