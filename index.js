@@ -10,8 +10,12 @@ const nodemailer = require('nodemailer');
 const pdfMakePrinter = require('pdfmake');
 const rootDir = path.resolve(path.dirname('.'));
 
+var moment = require('moment');
+require('moment/locale/fr');
+moment().locale('fr');
+
 const data = JSON.parse(fs.readFileSync('data.json'));
-console.log('Data: ', data);
+// console.log('Data: ', data);
 
 // Create a SMTP transport object
 const transport = nodemailer.createTransport({
@@ -34,7 +38,7 @@ app.use(function(req, res, next) {
 
 function createPdf(data) {
     var generateLines = function(lines) {
-        console.log('lines: ', lines);
+        // console.log('lines: ', lines);
         const tableLines = [];
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
@@ -64,7 +68,7 @@ function createPdf(data) {
         }
         return tableLines;
     }
-    console.log('generateLine: ', ...generateLines(data.bill.lines));
+    // console.log('generateLine: ', ...generateLines(data.bill.lines));
 
     var pdf = {
         pageMargins: [0, 0, 0, 0],
@@ -79,9 +83,9 @@ function createPdf(data) {
                             `${data.user.phone}\n`,
                             `${data.user.email}\n`,
                             `${data.user.website}\n`,
-                            `${data.user.siren}\n`,
-                            `${data.user.siret}\n`,
-                            `${data.user.rcs}\n`
+                            `SIREN:   ${data.user.siren}\n`,
+                            `SIRET:   ${data.user.siret}\n`,
+                            `RCS:   ${data.user.rcs}\n`
                         ],
                         width: '*',
                         alignment: 'right'
@@ -131,9 +135,9 @@ function createPdf(data) {
                                             {
                                                 border: [false, false, false, false],
                                                 text: [
-                                                    `${data.customer.firstname} ${data.customer.lastname}\n`,
-                                                    `${data.customer.address}\n`,
-                                                    `${data.customer.zip} ${data.customer.city}\n`
+                                                    `${(data.customer) ? data.customer.firstname : ''} ${(data.customer) ? data.customer.lastname : ''}\n`,
+                                                    `${(data.customer) ? data.customer.address : ''}\n`,
+                                                    `${(data.customer) ? data.customer.zip : ''} ${(data.customer) ? data.customer.city : ''}\n`
                                                 ],
                                                 margin: [10, 0, 0, 0],
                                             }
@@ -165,7 +169,7 @@ function createPdf(data) {
                                                         border: [false, false, false, false],
                                                         text: [
                                                             `${data.bill.id}\n`,
-                                                            `${data.bill.date}\n`,
+                                                            `${moment(data.bill.date * 1000).format('LL')}\n`,
                                                         ],
                                                         margin: [10, 0, 0, 0],
                                                     }
@@ -211,7 +215,7 @@ function createPdf(data) {
                                             },
                                             {
                                                 border: [false, false, false, false],
-                                                text: '100€'
+                                                text: data.bill.total_ht
                                             }
                                         ],
                                         [
@@ -221,7 +225,7 @@ function createPdf(data) {
                                             },
                                             {
                                                 border: [false, false, false, false],
-                                                text: '110€'
+                                                text: data.bill.total_ttc
                                             }
                                         ],
                                         [
@@ -233,7 +237,7 @@ function createPdf(data) {
                                             },
                                             {
                                                 border: [false, false, false, false],
-                                                text: '110€',
+                                                text: data.bill.total_ttc,
                                                 bold: true,
                                                 fontSize: 15,
                                             }
