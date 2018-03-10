@@ -45,7 +45,6 @@ function createPdf(data) {
             var tmp_line = [
                 {
                     text: line.description,
-                    margin: [0, 10],
                     margin: [0, 10]
                 },
                 {
@@ -58,21 +57,23 @@ function createPdf(data) {
                     margin: [0, 10],
                     alignment: 'center'
                 },
-                {
+                /*{
                     text: line.prix_ttc,
                     margin: [0, 10],
                     alignment: 'center'
-                }
+                }*/
             ];
             tableLines.push(tmp_line);
         }
+        console.log('tableLines.length: ' , tableLines.length);
         return tableLines;
     }
     // console.log('generateLine: ', ...generateLines(data.bill.lines));
 
     var pdf = {
         pageMargins: [0, 0, 0, 0],
-        content: [{ // LOGO + COMPANY INFO
+        content: [
+            {   // LOGO + COMPANY INFO
                 columns: [
                     {
                         width: 100,
@@ -83,9 +84,9 @@ function createPdf(data) {
                             `${data.user.phone}\n`,
                             `${data.user.email}\n`,
                             `${data.user.website}\n`,
-                            `SIREN:   ${data.user.siren}\n`,
+                            // `SIREN:   ${data.user.siren}\n`,
                             `SIRET:   ${data.user.siret}\n`,
-                            `RCS:   ${data.user.rcs}\n`
+                            // `RCS:   ${data.user.rcs}\n`
                         ],
                         width: '*',
                         alignment: 'right'
@@ -161,7 +162,8 @@ function createPdf(data) {
                                                         border: [false, false, true, false],
                                                         text: [
                                                             `Référence ${data.title.toLowerCase()}\n`,
-                                                            'Emise le'
+                                                            'Emise le\n',
+                                                            'Date d\'échéance'
                                                         ],
                                                         margin: [0, 0, 10, 0],
                                                     },
@@ -170,6 +172,7 @@ function createPdf(data) {
                                                         text: [
                                                             `${data.bill.id}\n`,
                                                             `${moment(data.bill.date * 1000).format('LL')}\n`,
+                                                            `${moment(data.bill.dateDue * 1000).format('LL')}\n`
                                                         ],
                                                         margin: [10, 0, 0, 0],
                                                     }
@@ -186,13 +189,18 @@ function createPdf(data) {
             {   // TABLE 
                 style: 'tableExample',
                 table: {
-                    widths: ['*', 50, 50, 50],
+                    widths: [
+                        '*',
+                        50,
+                        50,
+                        // 50
+                    ],
                     body: [
                         [
                             {fontSize: 12, bold: true, text: 'Description', margin: [0, 15]},
                             {fontSize: 12, bold: true, text: 'Qté', alignment: 'center', margin: [0, 15]},
                             {fontSize: 12, bold: true, text: 'Prix HT', alignment: 'center', margin: [0, 15]},
-                            {fontSize: 12, bold: true, text: 'Prix TTC', alignment: 'center', margin: [0, 15]}
+                            // {fontSize: 12, bold: true, text: 'Prix TTC', alignment: 'center', margin: [0, 15]}
                         ],
                         ...generateLines(data.bill.lines),
                         [
@@ -202,7 +210,8 @@ function createPdf(data) {
                                 border: [false, false, false, false]
                             },
                             {
-                                colSpan: 3,
+                                // colSpan: 3,
+                                colSpan: 2,
                                 width: 'auto',
                                 border: [false, false, false, false],
                                 table: {
@@ -215,41 +224,73 @@ function createPdf(data) {
                                             },
                                             {
                                                 border: [false, false, false, false],
-                                                text: data.bill.total_ht
+                                                text: `${data.bill.total_ht}€`
                                             }
                                         ],
-                                        [
+                                        /*[
                                             {
                                                 border: [false, false, false, false],
                                                 text: 'Prix TTC:'
                                             },
                                             {
                                                 border: [false, false, false, false],
-                                                text: data.bill.total_ttc
+                                                text: `${data.bill.total_ttc}€`
                                             }
-                                        ],
+                                        ],*/
                                         [
                                             {
                                                 border: [false, false, false, false],
-                                                text: 'A PAYER:',
+                                                text: (data.title === 'Devis') ? 'TOTAL:' : 'PAYÉ:',
                                                 bold: true,
-                                                fontSize: 15,
+                                                fontSize: 12,
                                             },
                                             {
                                                 border: [false, false, false, false],
-                                                text: data.bill.total_ttc,
+                                                text: `${data.bill.total_ttc}€`,
                                                 bold: true,
-                                                fontSize: 15,
+                                                fontSize: 12,
                                             }
                                         ]
                                     ]
                                 }
                             },
                             {},
-                            {}
                         ]
                     ]
                 }
+            },
+            {   // Conditions de règlement et NOTE
+                columns: [
+                    {
+                        text: [
+                            { text: 'Conditions de règlement\n', fontSize: 14, bold: true },
+                            {
+                                text: 'Taux d\'escompte: Pas d\'escompte pour le paiment anticipé. \n Taux de pénalité: En cas de retard de paiement, application d\'intérêts de 3 fois le taux légal selon la loi n°2008-776 du 4 août 2008. \n\n\n',
+                                fontSize: 10
+                                
+                            },
+                            { text: 'Note\n', fontSize: 14, bold: true },
+                            {
+                                text: 'TVA non applicable, article 293 B du Code général des impôts. \n Pour vous, notre meilleure offre.',
+                                fontSize: 10
+                                
+                            },
+                        ],
+                        margin: [10, 10, 10, 10],
+                        width: '60%',
+                    }, {
+                        text: '',
+                        width: '40%'
+                    }
+                ]
+            }, 
+            {
+                text: 'Signature:',
+                width: '*',
+                alignment: 'right',
+                bold: true,
+                fontSize: 15,
+                margin: [0, 0, 150, 0],
             }
         ],
         styles: {
